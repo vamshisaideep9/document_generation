@@ -104,13 +104,15 @@ export function renderForm(docName, docData) {
         attachPayslipCalculator();
     }
 }
+
+
 function attachPayslipCalculator() {
     const fullFields = ['basic_full', 'hra_full', 'conv_full', 'med_full', 'bonus_full', 'spec_full'];
     const actualFields = ['basic_actual', 'hra_actual', 'conv_actual', 'med_actual', 'bonus_actual', 'spec_actual'];
 
-
     const monthEl = document.getElementById('field-month_year');
     const daysEl = document.getElementById('field-days_in_month');
+
 
     if (monthEl && daysEl) {
         monthEl.addEventListener('input', (e) => {
@@ -137,7 +139,6 @@ function attachPayslipCalculator() {
             totalActual += val;
         });
 
-
         const totalFullEl = document.getElementById('field-total_full');
         const totalActualEl = document.getElementById('field-total_actual');
         const netTotalEl = document.getElementById('field-net_total');
@@ -146,10 +147,12 @@ function attachPayslipCalculator() {
         if (totalActualEl) totalActualEl.value = totalActual;
         
         if (netTotalEl) {
-            netTotalEl.value = totalFull > 0 ? totalFull - 200 : 0; 
+             const net = totalActual > 0 ? totalActual - 200 : 0;
+             netTotalEl.value = Math.max(0, net); 
         }
     };
 
+    // 3. Attach listeners to every relevant input
     [...fullFields, ...actualFields].forEach(field => {
         const el = document.getElementById(`field-${field}`);
         if (el) {

@@ -1,3 +1,4 @@
+import os 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -17,7 +18,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Operational Framework: Document Engine",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
+    root_path=os.environ.get("ROOT_PATH", "")
 )
 
 

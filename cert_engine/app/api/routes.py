@@ -1,3 +1,4 @@
+import os 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +12,10 @@ from app.services.generator import create_document
 
 router = APIRouter()
 
-# --- 1. Expand Discovery Map ---
+
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+
 DOCUMENT_SCHEMA_MAP = {
     "student": {
         "internship_certificate": {
@@ -28,7 +32,6 @@ DOCUMENT_SCHEMA_MAP = {
             "template_file": "releiving_letter_sample.docx",
             "required_fields": ["name", "gender", "date", "job_role", "from_date", "to_date", "relieving_date", "key_responsibilities"]
         },
-        # NEW: Payslip Module
         "monthly_payslip": {
             "template_file": "payslip_sample.docx",
             "required_fields": [
@@ -48,59 +51,57 @@ async def get_document_schemas() -> Dict[str, Any]:
 
 @router.post("/generate")
 async def generate_document(payload: GenerationRequest, db: AsyncSession = Depends(get_db)):
+    if payload.secret_key != SECRET_KEY:
+        raise HTTPException(
+            status_code=401, 
+            detail="Unauthorized: Invalid Secret Key"
+        )
+    
     context = payload.model_dump(exclude_none=True)
-
-
     for key, value in context.items():
+        if not value: continue
+
         if "date" in key.lower():
             try:
                 date_obj = datetime.strptime(value, "%Y-%m-%d")
                 context[key] = date_obj.strftime("%d-%m-%Y")
             except (ValueError, TypeError):
                 continue
-        
         if key == "month_year":
             try:
                 date_obj = datetime.strptime(value, "%Y-%m")
                 context[key] = date_obj.strftime("%B %Y") 
             except (ValueError, TypeError):
                 continue
+
+
     if payload.gender:
         g = payload.gender.lower()
         if g == "male":
             context.update({
-                "title": "Mr.",
-                "sub": "He",     
-                "obj": "him",     
-                "poss": "his",    
-                "sub_cap": "He",
-                "poss_cap": "His"
+                "title": "Mr.", "sub": "He", "obj": "him", "poss": "his",
+                "sub_cap": "He", "poss_cap": "His"
             })
         elif g == "female":
             context.update({
-                "title": "Ms.",
-                "sub": "She",
-                "obj": "her",
-                "poss": "her",
-                "sub_cap": "She",
-                "poss_cap": "Her"
+                "title": "Ms.", "sub": "She", "obj": "her", "poss": "her",
+                "sub_cap": "She", "poss_cap": "Her"
             })
 
     if payload.template_name == "payslip_sample.docx" and payload.net_total:
         try:
-            numeric_total = float(payload.net_total.replace(',', ''))
+            raw_total = str(payload.net_total).replace(',', '')
+            numeric_total = float(raw_total)
             words = num2words(numeric_total, lang='en_IN').replace('-', ' ').title()
             context['net_total_in_words'] = f"{words} Rupees Only"
-        except ValueError:
-            raise HTTPException(status_code=400, detail="net_total must be a valid number for word conversion.")
-
-
-    if payload.export_format.lower() == "pdf":
-        raise HTTPException(status_code=501, detail="PDF Engine Offline. Requires LibreOffice.")
-
-
+        except (ValueError, TypeError):
+             pass 
     try:
-        file_stream = create_document(payload.template_name, context, output_format=payload.export_format)
+        file_stream = create_document(
+            payload.template_name, 
+            context, 
+            output_format=payload.export_format
+        )
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
@@ -111,9 +112,19 @@ async def generate_document(payload: GenerationRequest, db: AsyncSession = Depen
     await db.commit()
     
     clean_name = payload.name.replace(" ", "_")
-    human_readable_doc = payload.template_name.replace('_sample.docx', '').replace('_', ' ').title()
     ext = payload.export_format.lower()
-    final_filename = f"{clean_name}_{human_readable_doc}.{ext}"
+
+    if payload.template_name == "payslip_sample.docx":
+        try:
+            dt = datetime.strptime(payload.month_year, "%Y-%m")
+            month_val = dt.strftime("%B") 
+            year_val = dt.strftime("%Y")   
+            final_filename = f"{clean_name}_{month_val}_{year_val}_payslip.{ext}"
+        except (ValueError, TypeError, AttributeError):
+            final_filename = f"{clean_name}_payslip.{ext}"
+    else:
+        human_readable_doc = payload.template_name.replace('_sample.docx', '').replace('_', ' ').title()
+        final_filename = f"{clean_name}_{human_readable_doc.replace(' ', '_')}.{ext}"
     
     mime_type = "application/pdf" if ext == "pdf" else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     headers = {

@@ -19,6 +19,7 @@ class GenerationLog(Base):
 class GenerationRequest(BaseModel):
     template_name: str
     export_format: str = "docx"
+    secret_key: str 
     name: str
     gender: Optional[str] = None
     
