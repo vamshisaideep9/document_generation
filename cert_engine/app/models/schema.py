@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, DateTime, func
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel
 from typing import Optional, Union
 import uuid
 from app.core.config import Base
@@ -19,7 +19,6 @@ class GenerationLog(Base):
 class GenerationRequest(BaseModel):
     template_name: str
     export_format: str = "docx"
-    secret_key: str 
     name: str
     gender: Optional[str] = None
     

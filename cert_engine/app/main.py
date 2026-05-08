@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from app.core.config import engine, Base
 from app.models.schema import GenerationLog
 from app.api.routes import router
+from app.api.auth import auth_router
 
 
 @asynccontextmanager
@@ -33,7 +34,10 @@ app.add_middleware(
 )
 
 
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(router, prefix="/api/v1")
+
+
 @app.get("/")
 async def root():
     return {"message": "System Online. Navigate to /docs to execute endpoints."}

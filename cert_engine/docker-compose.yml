@@ -1,7 +1,7 @@
 
 services:
   api:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     container_name: cert_engine_api
@@ -12,7 +12,11 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - USER1_USERNAME=${USER1_USERNAME}
+      - USER1_PASSWORD=${USER1_PASSWORD}
+      - USER2_USERNAME=${USER2_USERNAME}
+      - USER2_PASSWORD=${USER2_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
@@ -34,16 +38,17 @@ services:
       timeout: 5s
       retries: 5
 
-
   frontend:
-    image: nginx:alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - API_URL=http://api:8000
     container_name: cert_engine_ui
     ports:
-      - "3000:80"
-    volumes:
-      - ./frontend:/usr/share/nginx/html:ro 
+      - "3000:3000"
     depends_on:
-      - api 
+      - api
 
 volumes:
   postgres_data:

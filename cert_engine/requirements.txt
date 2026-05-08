@@ -9,8 +9,10 @@ sqlalchemy==2.0.29
 asyncpg==0.29.0
 alembic==1.13.1
 
+# Auth
+python-jose[cryptography]==3.3.0
+
 # Core Engine: Word Templating
 docxtpl==0.16.7
-
 
 num2words
