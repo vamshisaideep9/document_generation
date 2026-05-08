@@ -43,7 +43,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - API_URL=https://www.brollysolutions.in
+        - API_URL=https://www.brollysolutions.in/document_generator
     container_name: cert_engine_ui
     ports:
       - "3000:3000"

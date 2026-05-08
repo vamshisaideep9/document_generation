@@ -79,7 +79,7 @@ export function DocumentForm({ schema, onGenerate, isLoading }: DocumentFormProp
 
   const isPayslip = schema.template_file === PAYSLIP_TEMPLATE
 
-  const computed = useMemo(() => {
+  const computed = useMemo((): Record<string, string> => {
     if (!isPayslip) return {}
     const days = getDaysInMonth(values.month_year ?? '')
     const totFull = PAYSLIP_COMPONENTS.reduce(
@@ -99,7 +99,7 @@ export function DocumentForm({ schema, onGenerate, isLoading }: DocumentFormProp
     }
   }, [isPayslip, values])
 
-  const allValues: Record<string, string> = { ...values, ...(computed as Record<string, string>) }
+  const allValues: Record<string, string> = { ...values, ...computed }
 
   const set = (field: string, value: string) =>
     setValues((prev) => ({ ...prev, [field]: value }))
@@ -117,7 +117,7 @@ export function DocumentForm({ schema, onGenerate, isLoading }: DocumentFormProp
     const meta = FIELD_META[field]
     const value = allValues[field] ?? ''
     const label = fieldLabel(field)
-    const isReadOnly = readOnly || computed[field as keyof typeof computed] !== undefined
+    const isReadOnly = readOnly || computed[field] !== undefined
 
     if (meta?.type === 'select' && meta.options) {
       return (
