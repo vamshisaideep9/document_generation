@@ -10,10 +10,13 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ROOT_PATH=${ROOT_PATH}
       - USER1_USERNAME=${USER1_USERNAME}
       - USER1_PASSWORD=${USER1_PASSWORD}
       - USER2_USERNAME=${USER2_USERNAME}
       - USER2_PASSWORD=${USER2_PASSWORD}
+      - USER3_USERNAME=${USER3_USERNAME}
+      - USER3_PASSWORD=${USER3_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
@@ -40,7 +43,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - API_URL=https://www.brollysolutions.in/document_generator
+        - API_URL=http://api:8000
     container_name: cert_engine_ui
     ports:
       - "3000:3000"
