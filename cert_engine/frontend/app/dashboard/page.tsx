@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { getToken, clearToken } from '@/lib/auth'
-import { fetchSchema, generateDocument } from '@/lib/api'
-import { Sidebar } from '@/components/Sidebar'
-import { DocumentForm } from '@/components/DocumentForm'
-import { ToastContainer } from '@/components/Toast'
-import type { DocumentSchema, DocTypeSchema, Toast } from '@/lib/types'
+import { getToken, clearToken } from '../../lib/auth'
+import { fetchSchema, generateDocument } from '../../lib/api'
+import { Sidebar } from '../../components/Sidebar'
+import { DocumentForm } from '../../components/DocumentForm'
+import { ToastContainer } from '../../components/Toast'
+import type { DocumentSchema, DocTypeSchema, Toast } from '../../lib/types'
 
 let toastCounter = 0
 
@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [selectedDocType, setSelectedDocType] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [sessionExpired, setSessionExpired] = useState(false)
 
   const addToast = useCallback((type: Toast['type'], message: string) => {
     const id = String(++toastCounter)
@@ -35,8 +36,8 @@ export default function DashboardPage() {
 
   const handleUnauthorized = useCallback(() => {
     clearToken()
-    router.push('/login')
-  }, [router])
+    setSessionExpired(true)
+  }, [])
 
   useEffect(() => {
     if (!getToken()) {
@@ -135,6 +136,28 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {sessionExpired && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
+            <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Session Expired</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              Your session has expired. Please sign out and log in again to continue.
+            </p>
+            <button
+              onClick={handleLogout}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors"
+            >
+              Sign Out &amp; Login
+            </button>
+          </div>
+        </div>
+      )}
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>

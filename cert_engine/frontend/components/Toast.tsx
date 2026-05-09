@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import type { Toast } from '@/lib/types'
+import type { Toast } from '../lib/types'
 
 interface ToastContainerProps {
   toasts: Toast[]

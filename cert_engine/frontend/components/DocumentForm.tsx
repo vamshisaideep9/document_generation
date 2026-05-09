@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import type { DocTypeSchema } from '@/lib/types'
+import type { DocTypeSchema } from '../lib/types'
 
 const PAYSLIP_TEMPLATE = 'payslip_sample.docx'
 

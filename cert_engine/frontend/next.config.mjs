@@ -10,10 +10,6 @@ const nextConfig = {
       },
     ]
   },
-  webpack(config, { dir }) {
-    config.resolve.alias['@'] = dir
-    return config
-  },
 }
 
 export default nextConfig

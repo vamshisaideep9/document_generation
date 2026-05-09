@@ -5,9 +5,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: cert_engine_api
-    volumes:
-      - ./app:/workspace/app
-      - ./templates:/workspace/templates
     ports:
       - "8000:8000"
     environment:

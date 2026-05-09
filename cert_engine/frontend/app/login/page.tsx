@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { login } from '@/lib/api'
-import { setToken, getToken } from '@/lib/auth'
+import { login } from '../../lib/api'
+import { setToken, getToken } from '../../lib/auth'
 
 export default function LoginPage() {
   const router = useRouter()

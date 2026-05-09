@@ -1,6 +1,6 @@
 'use client'
 
-import type { DocumentSchema } from '@/lib/types'
+import type { DocumentSchema } from '../lib/types'
 
 interface SidebarProps {
   schema: DocumentSchema | null
