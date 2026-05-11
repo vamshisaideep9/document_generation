@@ -1,6 +1,8 @@
 import { getToken } from './auth'
 import type { DocumentSchema } from './types'
 
+const BASE_PATH = (process.env.NEXT_PUBLIC_BASEPATH ?? '').replace(/\/$/, '')
+
 async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getToken()
   const headers = new Headers(options.headers)
@@ -9,7 +11,7 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
 }
 
 export async function login(username: string, password: string): Promise<string> {
-  const res = await fetch('/api/v1/auth/login', {
+  const res = await fetch(`${BASE_PATH}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
@@ -23,7 +25,7 @@ export async function login(username: string, password: string): Promise<string>
 }
 
 export async function fetchSchema(): Promise<DocumentSchema> {
-  const res = await authFetch('/api/v1/documents/schema')
+  const res = await authFetch(`${BASE_PATH}/api/v1/documents/schema`)
   if (res.status === 401) throw new Error('unauthorized')
   if (!res.ok) throw new Error('Failed to load document types')
   return res.json() as Promise<DocumentSchema>
@@ -32,7 +34,7 @@ export async function fetchSchema(): Promise<DocumentSchema> {
 export async function generateDocument(
   payload: Record<string, string>
 ): Promise<{ blob: Blob; filename: string }> {
-  const res = await authFetch('/api/v1/generate', {
+  const res = await authFetch(`${BASE_PATH}/api/v1/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

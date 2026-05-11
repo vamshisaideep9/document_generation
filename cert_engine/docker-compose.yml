@@ -44,6 +44,7 @@ services:
       dockerfile: Dockerfile
       args:
         - API_URL=http://api:8000
+        - NEXT_PUBLIC_BASEPATH=/document_generator
     container_name: cert_engine_ui
     ports:
       - "3000:3000"

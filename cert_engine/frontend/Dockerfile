@@ -12,7 +12,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG API_URL=http://api:8000
+ARG NEXT_PUBLIC_BASEPATH=/document_generator
 ENV API_URL=$API_URL
+ENV NEXT_PUBLIC_BASEPATH=$NEXT_PUBLIC_BASEPATH
 RUN npm run build
 
 # Production runner
